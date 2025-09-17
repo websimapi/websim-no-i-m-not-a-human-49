@@ -158,7 +158,7 @@ async function transitionToScene(sceneIndex) {
       if (idx < maxFrames && idx < sceneAssets.frames.length) {
         posterizeInstance.setImage(sceneAssets.frames[idx]);
         playGateFrameClank(1.0);
-        const delay = (sceneAssets.delays[idx] || 100) * 0.8; // A little faster
+        const delay = sceneAssets.delays[idx] || 100;
         slideshowTimer = setTimeout(playFrame, delay);
       } else {
         // We've reached the last frame, stop audio.
@@ -169,8 +169,7 @@ async function transitionToScene(sceneIndex) {
     };
 
     requestAnimationFrame(()=>{ canvas.classList.add('reveal'); if(scene.onStart) scene.onStart(csElement, canvas);
-      const firstDelay = (sceneAssets.delays[0] || 100) * 0.8; // A little faster
-      slideshowTimer = setTimeout(playFrame, firstDelay);
+      slideshowTimer = setTimeout(playFrame, sceneAssets.delays[0]||100);
       if (currentSceneIndex < scenes.length - 1) { autoSkipTimeout = setTimeout(skipCurrentScene, scene.duration); csElement.addEventListener('click', skipCurrentScene, { once:true }); }
       isTransitioning=false;
     });
