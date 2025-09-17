@@ -1,5 +1,3 @@
-
-```
 export function applyPosterizeToImage(canvas, image, levels = 5.0, edgeMix = 0.12) {
   const gl = canvas.getContext('webgl');
   if (!gl) return;
