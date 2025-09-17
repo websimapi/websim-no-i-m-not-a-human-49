@@ -1,3 +1,5 @@
+
+```javascript
 export class FogFX {
   constructor(selector) {
     this.canvas = document.querySelector(selector);
@@ -18,13 +20,11 @@ float hash(vec2 p){return fract(sin(dot(p,vec2(41.3,289.1)))*43758.5453);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p);
   float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
   vec2 u=f*f*(3.0-2.0*f);
-  return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);
-}
+  return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}
 float fbm(vec2 p){
   float v=0.0,a=0.5;
   for(int i=0;i<5;i++){v+=a*noise(p);p=mat2(1.6,1.2,-1.2,1.6)*p; a*=0.55;}
-  return v;
-}
+  return v;}
 void main(){
   vec2 uv = gl_FragCoord.xy / r;
   vec2 q = uv*2.0 - 1.0;
@@ -38,8 +38,8 @@ void main(){
   float vign = smoothstep(1.2, 0.2, length(q)*0.9);
   float alpha = fog * vign * op;
   vec3 color = vec3(0.8); // neutral light fog
-  gl_FragColor = vec4(color, alpha);
-}`;
+  gl_FragColor = vec4(color, alpha);}
+`;
     const prog = gl.createProgram();
     const vsObj = this._shader(gl.VERTEX_SHADER, vs);
     const fsObj = this._shader(gl.FRAGMENT_SHADER, fs);

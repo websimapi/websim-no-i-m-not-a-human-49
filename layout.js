@@ -1,3 +1,5 @@
+
+```
 export function adjustLayout() {
   const sidePanels = document.querySelectorAll('.side-panel'); if (!sidePanels.length) return;
   const app = document.getElementById('app'); if (!app) return;
@@ -12,5 +14,5 @@ export function adjustLayout() {
 export function updateBackgroundDrip() {
   const bg = document.querySelector('.background-drip'); const fig = document.querySelector('.figure-container'); if (!bg || !fig) return;
   const r = fig.getBoundingClientRect(); const startY = Math.round(r.top + r.height * 0.85);
-  bg.style.clipPath = `inset(${startY}px 0 0 0)`;
+  bg.style.clipPath = `inset(${startY}px 0 0 0)`
 }

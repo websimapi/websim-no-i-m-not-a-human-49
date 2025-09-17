@@ -1,3 +1,5 @@
+
+```javascript
 const AUDIO_DURATION = 95, FADE = 15, FADE_OUT_START = 80;
 export const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let audioUnlocked = false;

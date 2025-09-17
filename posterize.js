@@ -1,3 +1,5 @@
+
+```
 export function applyPosterizeToImage(canvas, image, levels = 5.0, edgeMix = 0.12) {
   const gl = canvas.getContext('webgl');
   if (!gl) return;
@@ -31,7 +33,7 @@ export function applyPosterizeToImage(canvas, image, levels = 5.0, edgeMix = 0.1
 
   float luma(vec3 c){ return dot(c, vec3(0.299, 0.587, 0.114)); }
   vec3 posterize(vec3 c, float lv){ return floor(c*lv)/lv; }
-  
+
   // Noise functions for lava lamp effect
   float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 
@@ -89,14 +91,14 @@ export function applyPosterizeToImage(canvas, image, levels = 5.0, edgeMix = 0.1
     vec3 edgeCol = vec3(1.0 - edge); // dark lines
 
     vec3 postEdge = mix(post, post*edgeCol, uEdgeMix);
-    
+
     // Weaken the posterize/edge effect in the land area, similar to before
     float posterizeStrengthMask = smoothstep(0.40, 0.80, vUV.y); // 0 in sky, 1 in land
     vec3 orig = texture2D(uTex0, distortedUV).rgb;
     vec3 finalCol = mix(postEdge, orig, posterizeStrengthMask * 0.5); // blend back original color in land
 
     gl_FragColor = vec4(finalCol, 1.0);
- }`;
+}`;
 
   const compile = (type, src) => {
     const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
@@ -155,8 +157,8 @@ export function applyPosterizeToImage(canvas, image, levels = 5.0, edgeMix = 0.1
     animationFrameId = requestAnimationFrame(animate);
   }
 
-  resize();
-  animate();
+  resize(); 
+  animate(); 
   window.addEventListener('resize', resize, { passive: true });
 
   // Return an object with cleanup and a method to update the uniform

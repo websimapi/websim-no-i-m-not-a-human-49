@@ -1,3 +1,5 @@
+
+```javascript
 import { applyPosterizeToImage } from './posterize.js';
 import { audioCtx, getBackgroundAudio, playGateCreak, startGateLongCreak, stopGateLongCreak, playGateThud, playGateStuck, playGateFrameClank } from './audio.js';
 import { animateBirds, stopBirds } from './birds.js';
@@ -90,7 +92,7 @@ async function transitionToScene(sceneIndex) {
   const gifWrapper = document.getElementById('cutscene-gif-wrapper');
   csElement.removeEventListener('click', skipCurrentScene);
   if (autoSkipTimeout) clearTimeout(autoSkipTimeout);
-  
+
   const isExitingScene2 = currentSceneIndex === 1;
 
   // For scenes other than scene 2, stop animations before fading.
@@ -103,14 +105,14 @@ async function transitionToScene(sceneIndex) {
         scenes[currentSceneIndex].onEnd();
     }
   }
-  
+
   // Fade out current scene. For scene 2, zoom continues during this fade.
   canvas.className = ''; // Clear all classes to trigger fade-out
   if (gifWrapper) gifWrapper.className = '';
   if (slideshowTimer) { clearTimeout(slideshowTimer); slideshowTimer=null; }
 
   await new Promise(r => setTimeout(r, 2000));
-  
+
   // Now that the screen is black, stop scene 2's zoom and run its cleanup.
   if (isExitingScene2) {
     if (zoomRafId) {
@@ -133,7 +135,7 @@ async function transitionToScene(sceneIndex) {
     try { posterizeInstance.cleanup(); } catch {}
     posterizeInstance = null;
   }
-  
+
   currentSceneIndex = sceneIndex;
   const scene = scenes[currentSceneIndex];
   const sceneAssets = preloadedAssets[currentSceneIndex];
@@ -143,7 +145,7 @@ async function transitionToScene(sceneIndex) {
       isTransitioning = false;
       return;
   }
-  
+
   if (scene.gif && sceneAssets.frames) {
     canvas.style.display = 'block';
     posterizeInstance = applyPosterizeToImage(canvas, sceneAssets.frames[0], 5.0, 0.12);
@@ -154,22 +156,31 @@ async function transitionToScene(sceneIndex) {
 
     const playFrame = () => {
       if (currentSceneIndex !== sceneIndex) return;
+      if (idx >= maxFrames -1) {
+        // Reached the last frame to display, so stop sounds.
+        stopGateLongCreak(0.5);
+        if (autoSkipTimeout) clearTimeout(autoSkipTimeout);
+        csElement.removeEventListener('click', skipCurrentScene);
+        return; // End the slideshow loop
+      }
+
       idx++;
-      if (idx < maxFrames && idx < sceneAssets.frames.length) {
+      if (idx < sceneAssets.frames.length) {
         posterizeInstance.setImage(sceneAssets.frames[idx]);
         playGateFrameClank(1.0);
-        const delay = sceneAssets.delays[idx] || 100;
+        const delay = (sceneAssets.delays[idx] || 100) * 0.75; // A little faster
         slideshowTimer = setTimeout(playFrame, delay);
       } else {
-        // We've reached the last frame, stop audio.
-        stopGateLongCreak(0.5); // Quicker fade out as the gate stops moving
-        if (autoSkipTimeout) clearTimeout(autoSkipTimeout); // also cancel the scene skip timeout
+        // Failsafe in case gif has fewer frames than maxFrames
+        stopGateLongCreak(0.5);
+        if (autoSkipTimeout) clearTimeout(autoSkipTimeout);
         csElement.removeEventListener('click', skipCurrentScene);
       }
     };
 
     requestAnimationFrame(()=>{ canvas.classList.add('reveal'); if(scene.onStart) scene.onStart(csElement, canvas);
-      slideshowTimer = setTimeout(playFrame, sceneAssets.delays[0]||100);
+      const firstDelay = (sceneAssets.delays[0] || 100) * 0.75; // Also speed up the first frame
+      slideshowTimer = setTimeout(playFrame, firstDelay);
       if (currentSceneIndex < scenes.length - 1) { autoSkipTimeout = setTimeout(skipCurrentScene, scene.duration); csElement.addEventListener('click', skipCurrentScene, { once:true }); }
       isTransitioning=false;
     });
@@ -182,7 +193,7 @@ async function transitionToScene(sceneIndex) {
         canvas.classList.add('reveal');
         if (scene.fadeInClass) canvas.classList.add(scene.fadeInClass);
         if (scene.animationClass) canvas.classList.add(scene.animationClass);
-        
+
         if (scene.onStart) scene.onStart(csElement, canvas);
 
         if (currentSceneIndex < scenes.length - 1) {
@@ -232,7 +243,7 @@ export async function startCutscene(){
   const loading = csElement.querySelector('.cutscene-loading');
   csElement.style.display = 'flex';
   loading.style.display = 'grid';
-  
+
   try {
     preloadedAssets = await preloadCutsceneAssets();
   } catch (error) {
@@ -242,10 +253,10 @@ export async function startCutscene(){
     return;
   }
   loading.style.display = 'none';
-  
+
   const bg = getBackgroundAudio();
   if (bg) { try { bg.pause(); } catch(e){} }
-  
+
   const cutsceneAudio = new Audio('Distant Transmission - Sonauto.ai.ogg');
   const src = audioCtx.createMediaElementSource(cutsceneAudio);
   const g = audioCtx.createGain();

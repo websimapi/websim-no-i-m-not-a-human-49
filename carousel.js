@@ -1,3 +1,6 @@
+
+```javascript
+// No updates were provided in the plan, so the code remains the same.
 function measureStep(panel){
   const track = panel.querySelector('.panel-track'); const a=track?.children[0], b=track?.children[1]; if (!a || !b) return 0;
   const r1=a.getBoundingClientRect(), r2=b.getBoundingClientRect(); return Math.max(0, r2.top - r1.top);
