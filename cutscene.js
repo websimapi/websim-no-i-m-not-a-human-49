@@ -150,10 +150,24 @@ async function transitionToScene(sceneIndex) {
     const wrapper = document.getElementById('cutscene-canvas-wrapper');
     if (scene.animationClass && wrapper) wrapper.classList.add(scene.animationClass);
     let idx = 0;
-    const playFrame = () => { if(currentSceneIndex!==sceneIndex) return;
-      idx = (idx+1) % sceneAssets.frames.length; posterizeInstance.setImage(sceneAssets.frames[idx]); playGateFrameClank(1.0);
-      const delay = sceneAssets.delays[idx] || 100; slideshowTimer = setTimeout(playFrame, delay);
+    const maxFrames = 3; // As per instruction, stop at the 3rd frame (index 2)
+
+    const playFrame = () => {
+      if (currentSceneIndex !== sceneIndex) return;
+      idx++;
+      if (idx < maxFrames && idx < sceneAssets.frames.length) {
+        posterizeInstance.setImage(sceneAssets.frames[idx]);
+        playGateFrameClank(1.0);
+        const delay = sceneAssets.delays[idx] || 100;
+        slideshowTimer = setTimeout(playFrame, delay);
+      } else {
+        // We've reached the last frame, stop audio.
+        stopGateLongCreak(0.5); // Quicker fade out as the gate stops moving
+        if (autoSkipTimeout) clearTimeout(autoSkipTimeout); // also cancel the scene skip timeout
+        csElement.removeEventListener('click', skipCurrentScene);
+      }
     };
+
     requestAnimationFrame(()=>{ canvas.classList.add('reveal'); if(scene.onStart) scene.onStart(csElement, canvas);
       slideshowTimer = setTimeout(playFrame, sceneAssets.delays[0]||100);
       if (currentSceneIndex < scenes.length - 1) { autoSkipTimeout = setTimeout(skipCurrentScene, scene.duration); csElement.addEventListener('click', skipCurrentScene, { once:true }); }
