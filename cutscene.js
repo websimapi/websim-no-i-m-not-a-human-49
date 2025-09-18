@@ -75,6 +75,7 @@ let isTransitioning = false;
 let csElement = null;
 let preloadedAssets = [];
 let slideshowTimer = null;
+let gateFrameClickHandler = null;
 
 const skipCurrentScene = () => {
   if (currentSceneIndex < scenes.length - 1) {
@@ -90,6 +91,8 @@ async function transitionToScene(sceneIndex) {
   const gifWrapper = document.getElementById('cutscene-gif-wrapper');
   csElement.removeEventListener('click', skipCurrentScene);
   if (autoSkipTimeout) clearTimeout(autoSkipTimeout);
+  // remove previous scene-3 click advance handler if any
+  if (gateFrameClickHandler) { csElement.removeEventListener('click', gateFrameClickHandler); gateFrameClickHandler = null; }
   
   const isExitingScene2 = currentSceneIndex === 1;
 
@@ -164,10 +167,14 @@ async function transitionToScene(sceneIndex) {
         // We've reached the last frame, stop audio.
         stopGateLongCreak(0.5); // Quicker fade out as the gate stops moving
         if (autoSkipTimeout) clearTimeout(autoSkipTimeout); // also cancel the scene skip timeout
-        csElement.removeEventListener('click', skipCurrentScene);
+        if (gateFrameClickHandler) { csElement.removeEventListener('click', gateFrameClickHandler); gateFrameClickHandler = null; }
       }
     };
 
+    // allow user click to advance to next frame immediately
+    gateFrameClickHandler = () => { if (slideshowTimer) { clearTimeout(slideshowTimer); slideshowTimer = null; } playFrame(); };
+    csElement.addEventListener('click', gateFrameClickHandler);
+    
     requestAnimationFrame(()=>{ canvas.classList.add('reveal'); if(scene.onStart) scene.onStart(csElement, canvas);
       slideshowTimer = setTimeout(playFrame, sceneAssets.delays[0]||100);
       if (currentSceneIndex < scenes.length - 1) { autoSkipTimeout = setTimeout(skipCurrentScene, scene.duration); csElement.addEventListener('click', skipCurrentScene, { once:true }); }
